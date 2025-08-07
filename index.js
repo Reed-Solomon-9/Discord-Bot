@@ -246,6 +246,13 @@ client.on('messageCreate', async message => {
                 } catch (error) {
                     console.error('Failed to delete message:', error);
                 }
+
+                // Notify all members of private thread to prompt them to vote
+                const threadMembers = await privateThread.members.fetch();
+                const mentions = threadMembers.map(member => `<@${member.id}>`);
+                const mentionMessage = `Hey ${mentions.join(', ')}, vote on this submission in the C.U.C.K. Council`;
+                await privateThread.send(mentionMessage);
+
             } else {
                 message.reply('Error: Could not find the private thread.');
             }
@@ -276,6 +283,8 @@ client.on('messageCreate', async message => {
         }
         return; // Stop processing further commands
     }
+
+    
 
     // --- MEMBER ADJUSTMENT LOGIC (Commands can be used in any channel) ---
     // Check if the user has a Discord admin role in the server
