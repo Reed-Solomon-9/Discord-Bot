@@ -33,6 +33,17 @@ const client = new Client({
     ]
 });
 
+// Listener for ready event
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
+// Listener for the disconnect event
+client.on('disconnect', () => {
+  console.log('Bot disconnected from Discord. Attempting to reconnect...');
+  client.login(process.env.DISCORD_TOKEN);
+});
+
 
 
 // A function to check the CSV file and perform actions
