@@ -3,8 +3,22 @@ const { Client, GatewayIntentBits, PermissionsBitField } = require('discord.js')
 const cron = require('node-cron');
 const fs = require('fs');
 const csv = require('csv-parser');
+const express = require('express');
+const app = express();
 
-// Replace these with your actual Channel and Thread IDs
+// Initialize Express app and define the endpoint
+app.get('/', (req, res) => {
+  res.send('Bot is awake!');
+});
+
+// Initialize web server 
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Web server listening on port ${port}`);
+});
+
+
+// Channel and Thread IDs
 const SUBMISSION_CHANNEL_ID = '1401018910362566748';
 const PRIVATE_THREAD_ID = '1401021916910719029';
 const GUILD_ID = '1401018909242429512'; 
@@ -249,7 +263,6 @@ client.on('messageCreate', async message => {
         return; // Important: return after handling removemember
     }
 });
-
 
 
 client.login(process.env.DISCORD_TOKEN);
