@@ -44,6 +44,49 @@ client.on('disconnect', () => {
   client.login(process.env.DISCORD_TOKEN);
 });
 
+// More assorted listeners
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+});
+
+client.on('error', err => {
+  console.error('Client Error:', err);
+});
+
+client.on('warn', info => {
+  console.warn('Client Warning:', info);
+});
+
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 10;
+const BASE_DELAY = 1000; // 1 second
+
+client.on('shardDisconnect', (event, id) => {
+  console.log(`Shard ${id} disconnected with code ${event.code}.`);
+  
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    console.error('Max reconnection attempts reached. Shutting down.');
+    process.exit(1);
+    return;
+  }
+
+  // Calculate the exponential backoff delay with jitter
+  const delay = Math.min(BASE_DELAY * Math.pow(2, reconnectAttempts) + Math.random() * 1000, 30000); // Max delay of 30 seconds
+  reconnectAttempts++;
+
+  console.log(`Attempting to reconnect in ${delay / 1000} seconds. (Attempt ${reconnectAttempts})`);
+
+  setTimeout(() => {
+    client.login(process.env.DISCORD_TOKEN);
+  }, delay);
+});
+
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+  reconnectAttempts = 0; // Reset the counter on successful connection
+});
+
+
 
 
 // A function to check the CSV file and perform actions
