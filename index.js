@@ -60,7 +60,10 @@ client.on('shardDisconnect', (event, id) => {
 
   console.log(`Attempting to reconnect in ${delay / 1000} seconds. (Attempt ${reconnectAttempts})`);
 
-
+  setTimeout(() => {
+    client.login(process.env.DISCORD_TOKEN);
+  }, delay);
+});
 
 // Listener for when the bot is actively trying to reconnect.
 client.on('reconnecting', () => {
@@ -82,10 +85,8 @@ client.on('warn', info => {
   console.warn('[WARNING] A client warning was received:', info);
 });
   
-  setTimeout(() => {
-    client.login(process.env.DISCORD_TOKEN);
-  }, delay);
-});
+
+
 
 
 
