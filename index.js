@@ -249,7 +249,8 @@ client.on('messageCreate', async message => {
 
                 // Notify all members of private thread to prompt them to vote
                 const threadMembers = await privateThread.members.fetch();
-                const mentions = threadMembers.map(member => `<@${member.id}>`);
+                const humanMembers = threadMembers.filter(member => !member.user.bot);
+                const mentions = humanMembers.map(member => `<@${member.id}>`);
                 const mentionMessage = `Hey ${mentions.join(', ')}, vote on this submission in the C.U.C.K. Council`;
                 await privateThread.send(mentionMessage);
 
