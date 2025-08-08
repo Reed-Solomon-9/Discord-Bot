@@ -5,6 +5,7 @@ const fs = require('fs');
 const csv = require('csv-parser');
 const express = require('express');
 const app = express();
+const logger = require('./logger');
 
 // Initialize Express app and define the endpoint
 app.get('/', (req, res) => {
