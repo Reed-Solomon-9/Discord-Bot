@@ -33,39 +33,23 @@ const client = new Client({
     ]
 });
 
-// Listener for ready event
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
-
-// Listener for the disconnect event
-client.on('disconnect', () => {
-  console.log('Bot disconnected from Discord. Attempting to reconnect...');
-  client.login(process.env.DISCORD_TOKEN);
-});
-
-// More assorted listeners
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
-
-client.on('error', err => {
-  console.error('Client Error:', err);
-});
-
-client.on('warn', info => {
-  console.warn('Client Warning:', info);
-});
-
+// Counter for connection attempts and constraints for exp. backoff
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 10;
 const BASE_DELAY = 1000; // 1 second
 
+// Listener for successful connection
+client.on('ready', () => {
+  console.log(`[EVENT] Bot is now online and connected as ${client.user.tag}!`);
+  reconnectAttempts = 0;
+});
+
+// Listener for shard disconnect
 client.on('shardDisconnect', (event, id) => {
   console.log(`Shard ${id} disconnected with code ${event.code}.`);
   
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-    console.error('Max reconnection attempts reached. Shutting down.');
+    console.error('[FATAL] Max reconnection attempts reached. Shutting down.');
     process.exit(1);
     return;
   }
@@ -76,14 +60,31 @@ client.on('shardDisconnect', (event, id) => {
 
   console.log(`Attempting to reconnect in ${delay / 1000} seconds. (Attempt ${reconnectAttempts})`);
 
+
+
+// Listener for when the bot is actively trying to reconnect.
+client.on('reconnecting', () => {
+  console.warn('[EVENT] Bot is attempting to reconnect...');
+});
+
+// Listener for a successful connection resume.
+client.on('resume', id => {
+    console.log(`[EVENT] Shard ${id} successfully resumed its connection.`);
+});
+
+// Listener for client errors
+client.on('error', err => {
+  console.error('[FATAL ERROR] An unexpected client error occurred', err);
+});
+
+// Listener for client warnings
+client.on('warn', info => {
+  console.warn('[WARNING] A client warning was received:', info);
+});
+  
   setTimeout(() => {
     client.login(process.env.DISCORD_TOKEN);
   }, delay);
-});
-
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-  reconnectAttempts = 0; // Reset the counter on successful connection
 });
 
 
