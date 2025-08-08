@@ -92,7 +92,14 @@ process.on('unhandledRejection', (reason, promise) => {
   // Optional: Restart the bot or shut down gracefully
 });
 
-
+// Listener for process exit
+process.on('exit', (code) => {
+  if (code !== 0) {
+    logger.error(`[FATAL] The bot's process exited unexpectedly with code: ${code}`);
+  } else {
+    logger.info(`[INFO] The bot's process shut down gracefully.`);
+  }
+});
 
 
 
