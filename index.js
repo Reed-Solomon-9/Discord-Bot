@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
 // Initialize web server 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Web server listening on port ${port}`);
+  logger.info(`Web server listening on port ${port}`);
 });
 
 
@@ -40,16 +40,16 @@ const BASE_DELAY = 1000; // 1 second
 
 // Listener for successful connection
 client.on('ready', () => {
-  console.log(`[EVENT] Bot is now online and connected as ${client.user.tag}!`);
+  logger.info(`[EVENT] Bot is now online and connected as ${client.user.tag}!`);
   reconnectAttempts = 0;
 });
 
 // Listener for shard disconnect
 client.on('shardDisconnect', (event, id) => {
-  console.log(`Shard ${id} disconnected with code ${event.code}.`);
+  logger.info(`Shard ${id} disconnected with code ${event.code}.`);
   
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-    console.error('[FATAL] Max reconnection attempts reached. Shutting down.');
+    logger.error('[FATAL] Max reconnection attempts reached. Shutting down.');
     process.exit(1);
     return;
   }
@@ -58,7 +58,7 @@ client.on('shardDisconnect', (event, id) => {
   const delay = Math.min(BASE_DELAY * Math.pow(2, reconnectAttempts) + Math.random() * 1000, 30000); // Max delay of 30 seconds
   reconnectAttempts++;
 
-  console.log(`Attempting to reconnect in ${delay / 1000} seconds. (Attempt ${reconnectAttempts})`);
+  logger.info(`Attempting to reconnect in ${delay / 1000} seconds. (Attempt ${reconnectAttempts})`);
 
   setTimeout(() => {
     client.login(process.env.DISCORD_TOKEN);
@@ -67,25 +67,29 @@ client.on('shardDisconnect', (event, id) => {
 
 // Listener for when the bot is actively trying to reconnect.
 client.on('reconnecting', () => {
-  console.warn('[EVENT] Bot is attempting to reconnect...');
+  logger.warn('[EVENT] Bot is attempting to reconnect...');
 });
 
 // Listener for a successful connection resume.
 client.on('resume', id => {
-    console.log(`[EVENT] Shard ${id} successfully resumed its connection.`);
+    logger.info(`[EVENT] Shard ${id} successfully resumed its connection.`);
 });
 
 // Listener for client errors
 client.on('error', err => {
-  console.error('[FATAL ERROR] An unexpected client error occurred', err);
+  logger.error('[FATAL ERROR] An unexpected client error occurred', err);
 });
 
 // Listener for client warnings
 client.on('warn', info => {
-  console.warn('[WARNING] A client warning was received:', info);
+  logger.warn('[WARNING] A client warning was received:', info);
 });
-  
 
+// Listener for process
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Optional: Restart the bot or shut down gracefully
+});
 
 
 
@@ -101,7 +105,7 @@ const processMembersFile = async () => {
     };
 
     const today = new Date(); // Get today's date object
-    console.log(`Today's date: ${today.toDateString()}`); // Log today's date for debugging
+    logger.info(`Today's date: ${today.toDateString()}`); // Log today's date for debugging
 
     const results = [];
 
@@ -114,7 +118,7 @@ const processMembersFile = async () => {
             const guild = await client.guilds.fetch(GUILD_ID);
 
             if (!privateThread || !guild) {
-                console.error('Error: Could not find the private thread or guild. Check IDs.');
+                logger.error('Error: Could not find the private thread or guild. Check IDs.');
                 return;
             }
 
@@ -126,53 +130,53 @@ const processMembersFile = async () => {
                 const actionDate = new Date(row.date);
 
                 // Log the parsed date and the comparison for debugging
-                console.log(`Processing row: User ID: ${row.user_id}, Action: ${row.action}, CSV Date: ${row.date}`);
-                console.log(`Parsed action date: ${actionDate.toDateString()}`);
-                console.log(`Date comparison (isSameDay): ${isSameDay(actionDate, today)}`);
+                logger.info(`Processing row: User ID: ${row.user_id}, Action: ${row.action}, CSV Date: ${row.date}`);
+                logger.info(`Parsed action date: ${actionDate.toDateString()}`);
+                logger.info(`Date comparison (isSameDay): ${isSameDay(actionDate, today)}`);
 
                 // Check if the parsed date is valid and matches today's date
                 if (!isNaN(actionDate.getTime()) && isSameDay(actionDate, today)) {
                     const member = await guild.members.fetch(row.user_id).catch(err => {
-                        console.error(`Error fetching member ${row.user_id}:`, err);
+                        logger.error(`Error fetching member ${row.user_id}:`, err);
                         return null; // Return null if member not found
                     });
 
                     if (!member) {
-                        console.error(`Skipping action for user ID ${row.user_id}: Member not found in guild.`);
+                        logger.error(`Skipping action for user ID ${row.user_id}: Member not found in guild.`);
                         continue;
                     }
                     
                     if (row.action.toLowerCase() === 'add') { // Use .toLowerCase() for robustness
                         try {
                             await privateThread.members.add(member.user.id);
-                            console.log(`Successfully added ${member.user.tag} to the private thread.`);
+                            logger.warn(`Successfully added ${member.user.tag} to the private thread.`);
                         } catch (error) {
-                            console.error(`Failed to add member ${member.user.tag} to thread:`, error);
+                            logger.error(`Failed to add member ${member.user.tag} to thread:`, error);
                             // You might want to reply to an admin channel here for persistent notifications
                         }
                     } else if (row.action.toLowerCase() === 'remove') { // Use .toLowerCase() for robustness
                         try {
                             await privateThread.members.remove(member.user.id);
-                            console.log(`Successfully removed ${member.user.tag} from the private thread.`);
+                            logger.info(`Successfully removed ${member.user.tag} from the private thread.`);
                         } catch (error) {
-                            console.error(`Failed to remove member ${member.user.tag} from thread:`, error);
+                            logger.error(`Failed to remove member ${member.user.tag} from thread:`, error);
                             // You might want to reply to an admin channel here for persistent notifications
                         }
                     } else {
-                        console.warn(`Unknown action '${row.action}' for user ID ${row.user_id}. Skipping.`);
+                        logger.warn(`Unknown action '${row.action}' for user ID ${row.user_id}. Skipping.`);
                     }
                 } else {
-                    console.log(`Skipping row for user ID ${row.user_id}: Date mismatch or invalid date.`);
+                    logger.info(`Skipping row for user ID ${row.user_id}: Date mismatch or invalid date.`);
                 }
             }
         });
 };
 
 client.once('ready', () => {
-    console.log(`Ready! Logged in as ${client.user.tag}`);
+    logger.info(`Ready! Logged in as ${client.user.tag}`);
     // Schedule the task to run every day at 12:01 AM
     cron.schedule('1 0 * * *', () => {
-        console.log('Running daily member adjustment check...');
+        logger.info('Running daily member adjustment check...');
         processMembersFile();
     }, {
         timezone: "America/Los_Angeles" // Change this to your timezone
@@ -210,7 +214,7 @@ client.on('messageCreate', async message => {
                 try {
                     await message.delete();
                 } catch (error) {
-                    console.error('Failed to delete message:', error);
+                    logger.error('Failed to delete message:', error);
                 }
             } else {
                 message.reply('Error: Could not find the private thread. Check IDs.');
@@ -246,7 +250,7 @@ client.on('messageCreate', async message => {
                 try {
                     await message.delete();
                 } catch (error) {
-                    console.error('Failed to delete message:', error);
+                    logger.error('Failed to delete message:', error);
                 }
 
                 // Notify all members of private thread to prompt them to vote
@@ -278,10 +282,10 @@ client.on('messageCreate', async message => {
                     allow_multiselect: false // Changed from 'allowMultiselect' to 'allow_multiselect'
                 }
             });
-            console.log('Attempted to send minimal test poll.'); // Log success internally
+            logger.info('Attempted to send minimal test poll.'); // Log success internally
             message.reply('Test poll command processed. Check channel for poll!'); // Confirmation to user
         } catch (error) {
-            console.error('Failed to send minimal test poll (caught error):', error);
+            logger.error('Failed to send minimal test poll (caught error):', error);
             message.reply('Failed to send minimal test poll. Check console for errors.');
         }
         return; // Stop processing further commands
@@ -302,7 +306,7 @@ client.on('messageCreate', async message => {
                 await privateThread.members.add(member.user.id);
                 message.reply(`${member.user.username} has been added to the private thread.`);
             } catch (error) {
-                console.error('Failed to add member to thread:', error);
+                logger.error('Failed to add member to thread:', error);
                 message.reply('Could not add the member. Check the bot\'s permissions or the user\'s status.');
             }
         } else {
@@ -320,7 +324,7 @@ client.on('messageCreate', async message => {
                 await privateThread.members.remove(member.user.id);
                 message.reply(`${member.user.username} has been removed from the private thread.`);
             } catch (error) {
-                console.error('Failed to remove member from thread:', error);
+                logger.error('Failed to remove member from thread:', error);
                 message.reply('Could not remove the member. Check the bot\'s permissions.');
             }
         } else {
