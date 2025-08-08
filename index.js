@@ -19,7 +19,7 @@ app.listen(port, () => {
 
 
 // Channel and Thread IDs
-const SUBMISSION_CHANNEL_ID = '1401018910362566748';
+const SUBMISSION_CHANNEL_ID = '1403174534764564563';
 const PRIVATE_THREAD_ID = '1401021916910719029';
 const GUILD_ID = '1401018909242429512'; 
 const CSV_FILE_PATH = './members.csv';
