@@ -1,7 +1,7 @@
 const winston = require('winston');
 const { Logtail } = require('@logtail/winston'); // Correct import
 
-const logtailTransport = new Logtail('YOUR_BETTER_STACK_API_KEY');
+const logtailTransport = new Logtail('ENVF9A1YDz65qYMHa3kexfcT');
 
 const logger = winston.createLogger({
   level: 'info',
