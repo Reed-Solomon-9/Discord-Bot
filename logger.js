@@ -1,8 +1,8 @@
 const winston = require('winston');
 const { LogtailTransport } = require('@logtail/winston');
-const { Logtail } = require('@logtail/node'); // <-- Correct dependency
+const { Logtail } = require('@logtail/node');
 
-// Create the Logtail client first
+// Explicitly create the Logtail client
 const logtail = new Logtail('ues1YNiaXsVE6mXFJTLBhhkX');
 
 const logger = winston.createLogger({
@@ -15,7 +15,7 @@ const logger = winston.createLogger({
     new winston.transports.Console({
       format: winston.format.simple(),
     }),
-    new LogtailTransport(logtail) // <-- Pass the client to the transport
+    new LogtailTransport(logtail)
   ],
 });
 
