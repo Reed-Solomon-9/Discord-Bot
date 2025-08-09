@@ -1,7 +1,7 @@
 const winston = require('winston');
-const { Logtail } = require('@logtail/winston');
+const { Logtail } = require('@logtail/winston'); // Correct import
 
-const logtailTransport = new Logtail('ENVF9A1YDz65qYMHa3kexfcT')
+const logtailTransport = new Logtail('YOUR_BETTER_STACK_API_KEY');
 
 const logger = winston.createLogger({
   level: 'info',
@@ -13,8 +13,13 @@ const logger = winston.createLogger({
     new winston.transports.Console({
       format: winston.format.simple(),
     }),
-    logtailTransport // Add the Better Stack transport here
+    logtailTransport
   ],
+});
+
+// Add an error listener here to catch transport connection issues
+logtailTransport.on('error', (err) => {
+  console.error('Better Stack transport error:', err);
 });
 
 module.exports = logger;
