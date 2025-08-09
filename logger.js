@@ -1,5 +1,9 @@
 const winston = require('winston');
-const { LogtailTransport } = require('@logtail/winston'); // Corrected import name
+const { LogtailTransport } = require('@logtail/winston');
+const { Logtail } = require('@logtail/node'); // <-- Correct dependency
+
+// Create the Logtail client first
+const logtail = new Logtail('ENVF9A1YDz65qYMHa3kexfcT');
 
 const logger = winston.createLogger({
   level: 'info',
@@ -11,9 +15,7 @@ const logger = winston.createLogger({
     new winston.transports.Console({
       format: winston.format.simple(),
     }),
-    new LogtailTransport({
-      token: 'ENVF9A1YDz65qYMHa3kexfcT' // Correct way to pass the token
-    })
+    new LogtailTransport(logtail) // <-- Pass the client to the transport
   ],
 });
 
