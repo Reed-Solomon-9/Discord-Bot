@@ -12,7 +12,7 @@ const logger = winston.createLogger({
       format: winston.format.simple(),
     }),
     new LogtailTransport({
-      token: 'YOUR_BETTER_STACK_API_KEY' // Correct way to pass the token
+      token: 'ENVF9A1YDz65qYMHa3kexfcT' // Correct way to pass the token
     })
   ],
 });
