@@ -3,7 +3,7 @@ const { LogtailTransport } = require('@logtail/winston');
 const { Logtail } = require('@logtail/node'); // <-- Correct dependency
 
 // Create the Logtail client first
-const logtail = new Logtail('ENVF9A1YDz65qYMHa3kexfcT');
+const logtail = new Logtail('ues1YNiaXsVE6mXFJTLBhhkX');
 
 const logger = winston.createLogger({
   level: 'info',
